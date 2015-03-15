@@ -1,0 +1,17 @@
+@echo off
+echo 正在删除文件请等待...
+set TXT_PATH=${TEXT_PATH}
+set SAVE_PATH="${LOCAL_PATH}"
+set log="${CREATE_BAT_PATH}\del.log"
+@echo %date% %time% > %log%
+@echo start del Emofs >> %log%
+for /f %%i in (%TXT_PATH%\pkgOrder.txt) do (
+	@echo **********************************************************************************
+	@echo del %%i\target
+	@echo **********************************************************************************
+	rd /s /q %SAVE_PATH%\%%i\target
+) >> %log%
+echo 删除已经完成，请检查日志文件%log%中否有失败。
+del /s /q /f %SAVE_PATH%\install.log
+echo 删除完成!
+exit

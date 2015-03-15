@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="GBK"?>
+<config>
+	<configType value = 'group'>
+		<col name="REMIND_GROUP">JavaTeam</col>
+	</configType>
+	<configType value = 'eMail'>
+		<col name="HOST">smtp.163.com</col>
+		<col name="USER_NAME">javazdyb@163.com</col>
+		<col name="PASS_WORD">shangguanjian</col>
+		<col name="SUBJECT">验包结果</col>
+		<col name="CONTENT">验包日志在附件中</col>
+	</configType>
+	<!--以下配置可在具体的任务配置中配置个性化-->
+	<configType value = 'bat'>
+		<!--生成的bat文件存放路径-->
+		<col name="CREATE_BAT_PATH">C:\Users\SGJ\AppData\Local\Temp</col>
+		<!--原有的要执行的bat存放路径-->
+		<col name="BAT_PATH">bat</col>
+		<!--用于生成bat的txt文档存放路径-->
+		<col name="TEXT_PATH">config\\txt</col>
+	</configType>
+	<configType value = 'svn'>
+		<col name="SVN_ADDRESS">https://10.168.1.126:8443/svn/E_OSP</col>
+		<col name="SVN_USERNAME">shangguanjian</col>
+		<col name="SVN_PASSWORD"></col>
+	</configType>
+</config>

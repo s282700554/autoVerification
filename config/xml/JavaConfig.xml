@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="GBK"?>
+<autoPack>
+	<!--标准例子-->
+	<version value = '例子'>
+		<!--svn部份svn-->
+		<col name="SVN_PATH">E-OSP\\分支库\\020.变更区\\E-OSP 7.0.1.8\\20140606-8563\\编码\\010.源代码\\JAVA</col>
+		<col name="LOCAL_PATH">F:\\yb7018</col>
+		<col name="DY_LETTER">F:</col>
+		<!--日志部分log-->
+		<col name="LOG_FILE">F:\\yb7018\\install.log</col>
+		<col name="LOG_FIND_KEYWORD">BUILD FAILURE</col>
+		<!--发送邮件配置sendEMail,多条同时对应命令sendEMail:1,2,3-->
+		<col name="SEND_EMAIL">sendEMail</col>
+		<!--任务执行步骤-->
+		<col name="EXECUTION_STEP">svn,delbat,copybat,dybat,log</col>
+	</version>
+</autoPack>

@@ -1,0 +1,5 @@
+@echo off
+cd\
+cd "${LOCAL_PATH}"
+${DY_LETTER}
+mvn-install-all.bat

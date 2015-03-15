@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry excluding="src/|bat/" kind="src" path=""/>
+	<classpathentry kind="lib" path="F:/lib/antlr-runtime-3.4.jar"/>
+	<classpathentry kind="lib" path="F:/lib/aspectjrt-1.5.3.jar"/>
+	<classpathentry kind="lib" path="F:/lib/commons-codec-1.6.jar"/>
+	<classpathentry kind="lib" path="F:/lib/commons-io-1.4.jar"/>
+	<classpathentry kind="lib" path="F:/lib/commons-lang3-3.2.jar"/>
+	<classpathentry kind="lib" path="F:/lib/commons-logging-1.1.3.jar"/>
+	<classpathentry kind="lib" path="F:/lib/dom4j-1.6.1.jar"/>
+	<classpathentry kind="lib" path="F:/lib/ehcache-core-2.5.1.jar"/>
+	<classpathentry kind="lib" path="F:/lib/hamcrest-core-1.1.jar"/>
+	<classpathentry kind="lib" path="F:/lib/httpasyncclient-4.0-beta3.jar"/>
+	<classpathentry kind="lib" path="F:/lib/httpclient-4.2.5.jar"/>
+	<classpathentry kind="lib" path="F:/lib/httpcore-4.2.2.jar"/>
+	<classpathentry kind="lib" path="F:/lib/httpcore-nio-4.2.2.jar"/>
+	<classpathentry kind="lib" path="F:/lib/httpmime-4.2.3.jar"/>
+	<classpathentry kind="lib" path="F:/lib/jaxen-1.1.6.jar"/>
+	<classpathentry kind="lib" path="F:/lib/json-20090211.jar"/>
+	<classpathentry kind="lib" path="F:/lib/log4j-1.2.17.jar"/>
+	<classpathentry kind="lib" path="F:/lib/logback-classic-1.0.13.jar"/>
+	<classpathentry kind="lib" path="F:/lib/logback-core-1.0.13.jar"/>
+	<classpathentry kind="lib" path="F:/lib/mail-1.4.6.jar"/>
+	<classpathentry kind="lib" path="F:/lib/net.sf.oval-0.8.jar"/>
+	<classpathentry kind="lib" path="F:/lib/sequence-library-1.0.2.jar"/>
+	<classpathentry kind="lib" path="F:/lib/slf4j-api-1.7.7.jar"/>
+	<classpathentry kind="lib" path="F:/lib/slf4j-log4j12-1.7.7.jar"/>
+	<classpathentry kind="lib" path="F:/lib/sqljet-1.1.10.jar"/>
+	<classpathentry kind="lib" path="F:/lib/svnkit-1.7.13.jar"/>
+	<classpathentry kind="lib" path="F:/lib/webqq-core-1.2-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="F:/lib/xpp3_min-1.1.3.4.O.jar"/>
+	<classpathentry kind="lib" path="F:/lib/xstream-1.2.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="GBK"?>
+
+<controls> 
+  <control user="282700554"> 
+    <col name="USER_NAME">上官剑</col>  
+    <col name="USER_LEVEL">0</col>  
+    <col name="USER_MAIL">282700554@qq.com</col> 
+  </control>  
+  <control user="20110867"> 
+    <col name="USER_NAME">蔡旺华</col>  
+    <col name="USER_LEVEL">1</col> 
+  </control>  
+  <control user="420246551"> 
+    <col name="USER_NAME">黄宝龙</col>  
+    <col name="USER_LEVEL">2</col> 
+  </control>  
+  <control user="233060391"> 
+    <col name="USER_NAME">林财贵</col>  
+    <col name="USER_LEVEL">2</col> 
+  </control>  
+  <control user="93772790"> 
+    <col name="USER_NAME">刘文从</col>  
+    <col name="USER_LEVEL">2</col> 
+  </control>  
+  <control user="960456707"> 
+    <col name="USER_NAME">薛峰</col>  
+    <col name="USER_LEVEL">2</col> 
+  </control>  
+  <control mode="验包"> 
+    <col name="MODE_NAME">验包</col>  
+    <col name="MODE_LEVEL">2</col> 
+  </control>  
+  <control mode="日志"> 
+    <col name="MODE_NAME">日志</col>  
+    <col name="MODE_LEVEL">2</col> 
+  </control>  
+  <control mode="管理"> 
+    <col name="MODE_NAME">管理</col>  
+    <col name="MODE_LEVEL">0</col> 
+  </control>  
+  <control mode="请假"> 
+    <col name="MODE_NAME">请假</col>  
+    <col name="MODE_LEVEL">1</col> 
+  </control>  
+  <control mode="数据"> 
+    <col name="MODE_NAME">数据</col>  
+    <col name="MODE_LEVEL">3</col> 
+  </control>  
+  <control mode="绑定"> 
+    <col name="MODE_NAME">绑定</col>  
+    <col name="MODE_LEVEL">3</col> 
+  </control> 
+</controls>

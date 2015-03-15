@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="GBK"?>
+<autoPack>
+	<version value = '例子'>
+		<!--svn部份，单个时直接用svn;当多个时可带后缀svn1，svn2-->
+		<col name="SVN_PATH">E-OSP\\开发库\\050.编码\\010.源代码\\ORACLE</col>
+		<col name="LOCAL_PATH">F:\\dataYb7019</col>
+		<col name="SVN_PATH1">E-OSP\\开发库\\051.编码扩展\\030.外部依赖包\\开发库\\E-OSP 7.0.2.0</col>
+		<col name="LOCAL_PATH1">F:\\dataYb7019\\other</col>
+		<col name="DY_LETTER">F:</col>
+		<!--虚拟机还原部分-->
+		<col name="SNAP_NAME">EOSP7019</col>
+		<col name="VM_PATH">C:\\Program Files (x86)\\VMware\\VMware VIX\\</col>
+		<col name="VM_LETTER">C:</col>
+		<col name="SNAP_PATH">D:\\192 back\\Server 2003 7014 hotfix\\Windows Server 2003 Enterprise Edition.vmx</col>
+		<!--文件字符串替换部分,rep，多个时可带后缀rep1-->
+		<col name="REPLACE_FILE_PATH">F:\\dataYb7019</col>
+		<col name="REPLACE_FILE_TYPE">*.sql</col>
+		<col name="REPLACE_KEYWORD_FROM">WHENEVER SQLERROR EXIT SQL.SQLCODE ROLLBACK;</col>
+		<col name="REPLACE_KEYWORD_TO">SET ECHO ON;</col>
+		<!--文件关键字去除部分, del，多个时可带后缀del1-->
+		<col name="DELETE_FILEPATH">F:\\dataYb7019\\eosp_main_up.bat</col>
+		<col name="DELETE_KEYWORD">CALL AddPartition.bat ES_DBA %2 %3 >>%SAVE_PATH%\\UPDATE_ALL.LOG</col>
+		<!--日志部分，调用命令log;如果有多个加上后缀，如下对应命令为log1-->
+		<col name="LOG_FILE">F:\\dataYb7019\\UPDATE_ALL.LOG</col>
+		<col name="LOG_FIND_KEYWORD">ora-{$}ORA-{$}SP2{$}sp2</col>
+		<col name="LOG_COUNT_KEYWORD">警告：存在对象编译不通过，请检查</col>
+		<col name="LOG_COUNT_KEYWORD_NUM">1</col>
+		<!--发送邮件配置sendEMail,多条同时对应命令sendEMail:1,2,3-->
+		<col name="SEND_EMAIL">sendEMail</col>
+		<!--任务执行步骤{svn,**bat,rep,del,log,sleep}-->
+		<col name="EXECUTION_STEP">reSnabat,dataDelbat,sleep:30000,svn,svn1,dataDyCopybat,dataCopybat,rep,del,dataDybat,log</col>
+	</version>
+</autoPack>

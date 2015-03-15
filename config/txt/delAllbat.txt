@@ -1,0 +1,5 @@
+@echo off
+echo 正在删除文件请等待...
+rd /s /q "${LOCAL_PATH}"
+echo 删除完成!
+exit

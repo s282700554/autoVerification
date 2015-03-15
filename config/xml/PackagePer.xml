@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="GBK"?>
+
+<Verify> 
+  <personnel flag="1"> 
+    <col name="PER_NAME">上官剑</col>  
+    <col name="PER_ORDER">1</col> 
+  </personnel>  
+  <personnel flag="1"> 
+    <col name="PER_NAME">薛峰</col>  
+    <col name="PER_ORDER">2</col> 
+  </personnel>  
+  <personnel flag="1"> 
+    <col name="PER_NAME">林财贵</col>  
+    <col name="PER_ORDER">3</col> 
+  </personnel>  
+  <personnel flag="1"> 
+    <col name="PER_NAME">刘文从</col>  
+    <col name="PER_ORDER">4</col> 
+  </personnel>  
+  <personnel flag="0"> 
+    <col name="PER_NAME">黄宝龙</col>  
+    <col name="PER_ORDER">5</col> 
+  </personnel> 
+</Verify>

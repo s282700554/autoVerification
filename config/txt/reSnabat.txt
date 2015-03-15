@@ -1,0 +1,7 @@
+@echo off
+cd "${VM_PATH}"
+${VM_LETTER}
+vmrun -T ws revertToSnapshot "${SNAP_PATH}" "${SNAP_NAME}"
+cd "${VM_PATH}"
+${VM_LETTER}
+vmrun -T ws start "${SNAP_PATH}"

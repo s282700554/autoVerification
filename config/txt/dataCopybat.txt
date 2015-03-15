@@ -1,0 +1,3 @@
+xcopy "${LOCAL_PATH1}" "${LOCAL_PATH}" /y /e /i /q
+echo ¸´ÖÆÍê³É!
+exit
