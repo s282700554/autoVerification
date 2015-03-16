@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URLDecoder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,6 +71,8 @@ public class BatUtils {
      */
     public static void executionbat(String batName) throws Exception {
         try {
+            // 如果路径中带空格，执行报错，所以要进行编码
+            batName = URLDecoder.decode(batName, "GBK");
             Runtime runtime = Runtime.getRuntime();
             Process ps = runtime.exec(batName);
             ps.getOutputStream().close();

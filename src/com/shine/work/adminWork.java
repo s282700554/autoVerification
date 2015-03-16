@@ -68,9 +68,9 @@ public class adminWork implements ExecutionWork {
         } else if ("群号".equals(oper)) {
             setGroup(msgClient, msg);
         } else if ("加密".equals(oper)) {
-            encrypData("data");
+            encrypData(msgClient, msg, "data");
         } else if ("解密".equals(oper)) {
-            decrypData("data");
+            decrypData(msgClient, msg, "data");
         }
     }
 
@@ -321,12 +321,12 @@ public class adminWork implements ExecutionWork {
      * 2015-3-16	SGJ	新建
      * </pre>
      */
-    public static void encrypData(String path) throws Exception {
+    public static void encrypData(QqMessag msgClient, QQMsg msg, String path) throws Exception {
         File file = new File(path);
         if (file.canRead()) {
             if (file.isDirectory()) {
                 for (String pathTemp : file.list()) {
-                    encrypData(file + "/" + pathTemp);
+                    encrypData(null, null, file + "/" + pathTemp);
                 }
             } else {
                 String filePath = file.getAbsolutePath();
@@ -343,6 +343,9 @@ public class adminWork implements ExecutionWork {
             }
         }
         systemLock = false;
+        if (msgClient != null && msg != null) {
+            msgClient.send(msg, "系统数据加密完成!", 74);
+        }
     }
     
     /**
@@ -357,13 +360,13 @@ public class adminWork implements ExecutionWork {
      * 2015-3-16	SGJ	新建
      * </pre>
      */
-    public static void decrypData(String path) throws Exception {
+    public static void decrypData(QqMessag msgClient, QQMsg msg, String path) throws Exception {
         systemLock = true;
         File file = new File(path);
         if (file.canRead()) {
             if (file.isDirectory()) {
                 for (String pathTemp : file.list()) {
-                    decrypData(file + "/" + pathTemp);
+                    decrypData(null, null, file + "/" + pathTemp);
                 }
             } else {
                 String filePath = file.getAbsolutePath();
@@ -378,6 +381,9 @@ public class adminWork implements ExecutionWork {
                     fo.close();
                 }
             }
+        }
+        if (msgClient != null && msg != null) {
+            msgClient.send(msg, "系统数据解密完成!", 74);
         }
     }
 }
