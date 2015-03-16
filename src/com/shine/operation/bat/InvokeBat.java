@@ -43,9 +43,7 @@ public class InvokeBat {
             batPath = batConfig.get("CREATE_BAT_PATH");
         }
         try {
-            batName = batPath + "\\" + batName;
-            logger.warn("Ö´ÐÐbatÎÄ¼þ:" + batName);
-            BatUtils.executionbat(batName);
+            BatUtils.executionbat(batPath, batName);
         } catch (Exception e) {
             logger.error(e.getMessage());
             throw e;

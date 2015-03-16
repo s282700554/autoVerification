@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URLDecoder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,12 +68,13 @@ public class BatUtils {
      * 2014-5-20	SGJ	新建
      * </pre>
      */
-    public static void executionbat(String batName) throws Exception {
+    public static void executionbat(String batPath, String batName) throws Exception {
         try {
-            // 如果路径中带空格，执行报错，所以要进行编码
-            batName = URLDecoder.decode(batName, "GBK");
+            batPath = batPath.replaceAll(" ", "\" \"");
             Runtime runtime = Runtime.getRuntime();
-            Process ps = runtime.exec(batName);
+            String executionStr = "cmd /c \"" + batPath + "\\" + batName + "\"";
+            logger.warn("执行" + batName + "语句:" + executionStr);
+            Process ps = runtime.exec(executionStr);
             ps.getOutputStream().close();
             Thread t1 = getMessage(ps.getInputStream());
             Thread t2 = getMessage(ps.getErrorStream());
