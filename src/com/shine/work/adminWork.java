@@ -32,6 +32,8 @@ public class adminWork implements ExecutionWork {
 
     private static Logger logger = LoggerFactory.getLogger(adminWork.class);
 
+    public static boolean systemLock = false;
+    
     /**
      * 
      * 执行还原控制命令.
@@ -340,6 +342,7 @@ public class adminWork implements ExecutionWork {
                 }
             }
         }
+        systemLock = false;
     }
     
     /**
@@ -355,6 +358,7 @@ public class adminWork implements ExecutionWork {
      * </pre>
      */
     public static void decrypData(String path) throws Exception {
+        systemLock = true;
         File file = new File(path);
         if (file.canRead()) {
             if (file.isDirectory()) {

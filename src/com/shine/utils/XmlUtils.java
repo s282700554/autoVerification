@@ -130,8 +130,12 @@ public class XmlUtils {
      */
     public static void saveEncrypFile(Document document, String filePath) {
         try {
-            String data = document.asXML();
-            EncrypAndDecrypUtils.encrypDateToFile(data, filePath);
+            OutputFormat format = OutputFormat.createPrettyPrint();
+            format.setEncoding("GBK");
+            XMLWriter writer = new XMLWriter(new FileWriter(filePath), format);
+            writer.write(document);
+            writer.close();
+            EncrypAndDecrypUtils.encryp(filePath, null);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -30,6 +30,7 @@ import com.shine.authority.ExecutionTask;
 import com.shine.qq.listener.LoginActionListener;
 import com.shine.ui.login.CaptchaPanel;
 import com.shine.utils.SystemInfo;
+import com.shine.work.adminWork;
 
 public class QqMessag {
 
@@ -91,7 +92,11 @@ public class QqMessag {
             if (date == null || (new Date().getTime() - date.getTime()) > 5000) {
                 date = new Date();
                 try {
-                    ExecutionTask.verifyAuthority(this, msg);
+                    if (!msg.getText().startsWith("@管理加密") && adminWork.systemLock) {
+                        send(msg, "系统已锁,请解锁!", 5);
+                    } else {
+                        ExecutionTask.verifyAuthority(this, msg);
+                    }
                 } catch (Exception e) {
                     try {
                         send(msg, "执行命令失败:" + e.getMessage(), 5);
@@ -166,7 +171,7 @@ public class QqMessag {
         Random random = new Random();
         int name = random.nextInt();
         String fileName = String.valueOf(name).substring(1, String.valueOf(name).length()) + ".png";
-        fileName = SystemInfo.getVerifyPath() + "/" + fileName;
+        fileName = SystemInfo.getTempPath() + "/" + fileName;
         ImageIO.write(verify.image, "png", new File(fileName));
         logger.warn(verify.reason);
         logger.warn("请输入在项目根目录下verify.png图片里面的验证码:");

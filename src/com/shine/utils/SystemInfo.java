@@ -23,7 +23,7 @@ public class SystemInfo {
      * 2015-3-13	SGJ	ÐÂ½¨
      * </pre>
      */
-    public static String getVerifyPath() throws Exception {
+    public static String getTempPath() throws Exception {
         return System.getProperty("java.io.tmpdir");
     }
 }
