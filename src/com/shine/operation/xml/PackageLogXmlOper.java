@@ -17,16 +17,16 @@ import org.slf4j.LoggerFactory;
 import com.shine.utils.XmlUtils;
 
 public class PackageLogXmlOper {
-    
+
     // 日志
     private static Logger logger = LoggerFactory.getLogger(PackageLogXmlOper.class);
-    
+
     // 文件名
-    private static String filePath = "config/xml/PackageLog.xml";
-    
+    private static String filePath = "data/PackageLog.dat";
+
     // 时间格式
     private static DateFormat format = new SimpleDateFormat("yyyyMMdd");
-    
+
     /**
      * 
      * 添加日志节点.
@@ -34,8 +34,8 @@ public class PackageLogXmlOper {
      * @param userName
      * @param version
      * @throws Exception
-     *
-     * <pre>
+     * 
+     *             <pre>
      * 修改日期		修改人	修改原因
      * 2014-6-6	SGJ	新建
      * </pre>
@@ -79,7 +79,7 @@ public class PackageLogXmlOper {
      */
     @SuppressWarnings("unchecked")
     public static List<Map<String, String>> getLogInfo(String date) throws Exception {
-        List<Map<String, String>> listMaps = new ArrayList<Map<String,String>>();
+        List<Map<String, String>> listMaps = new ArrayList<Map<String, String>>();
         Document document = XmlUtils.getDocument(filePath);
         List<Element> elements = selectSingleNode(document, date);
         if (elements != null && elements.size() > 0) {
@@ -94,7 +94,7 @@ public class PackageLogXmlOper {
         }
         return listMaps;
     }
-    
+
     /**
      * 
      * 根据时间查询节点.
@@ -103,8 +103,8 @@ public class PackageLogXmlOper {
      * @param date
      * @return
      * @throws Exception
-     *
-     * <pre>
+     * 
+     *             <pre>
      * 修改日期		修改人	修改原因
      * 2014-6-6	SGJ	新建
      * </pre>
@@ -113,7 +113,7 @@ public class PackageLogXmlOper {
     private static List<Element> selectSingleNode(Document document, String date) throws Exception {
         return document.selectNodes("autoPack/log[@date = '" + date + "']");
     }
-    
+
     /**
      * 
      * 取得该日期的验包人员日志.
@@ -121,8 +121,8 @@ public class PackageLogXmlOper {
      * @param date
      * @return
      * @throws Exception
-     *
-     * <pre>
+     * 
+     *             <pre>
      * 修改日期		修改人	修改原因
      * 2014-6-6	SGJ	新建
      * </pre>
@@ -135,5 +135,39 @@ public class PackageLogXmlOper {
             sqlSB.append(map.get("PACK_NAME") + ":" + map.get("PACK_VER") + "\n");
         }
         return sqlSB.toString();
+    }
+
+    /**
+     * 
+     * 清除日志.
+     * 
+     * @param date
+     * @throws Exception
+     * 
+     *             <pre>
+     * 修改日期		修改人	修改原因
+     * 2015-3-16	SGJ	新建
+     * </pre>
+     */
+    @SuppressWarnings("unchecked")
+    public static void clearLog(String date) throws Exception {
+        Document document = XmlUtils.getDocument(filePath);
+        List<Element> elements = selectSingleNode(document, date);
+        Element rootElement = DocumentHelper.createElement("autoPack");
+        for (Element temp : elements) {
+            Element logElement = DocumentHelper.createElement("log");
+            logElement.addAttribute("date", temp.attributeValue("date"));
+            List<Element> childElements = temp.elements();
+            for (Element childElement : childElements) {
+                Element msgElement = DocumentHelper.createElement("col");
+                msgElement.addAttribute("name", childElement.attributeValue("name"));
+                msgElement.addText(childElement.getText());
+                logElement.add(msgElement);
+            }
+            rootElement.add(logElement);
+        }
+        document.remove(document.getRootElement());
+        document.add(rootElement);
+        XmlUtils.saveXMLFile(document, filePath);
     }
 }

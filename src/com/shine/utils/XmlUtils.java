@@ -105,7 +105,7 @@ public class XmlUtils {
         SAXReader saxReader = new SAXReader();
         Document document = null;
         try {
-            byte[] bytes = EncrypAndDecrypUtils.decryp(fileName);
+            byte[] bytes = EncrypAndDecrypUtils.decrypDataToByte(fileName);
             InputStream inputStream = new ByteArrayInputStream(bytes);
             document = saxReader.read(inputStream);
         } catch (Exception e) {

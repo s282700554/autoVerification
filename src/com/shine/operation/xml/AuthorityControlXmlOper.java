@@ -16,7 +16,7 @@ public class AuthorityControlXmlOper {
 
     private static Logger logger = LoggerFactory.getLogger(AuthorityControlXmlOper.class);
 
-    private static String filePath = "config/xml/AuthorityControl.xml";
+    private static String filePath = "data/AuthorityControl.dat";
 
     /**
      * 

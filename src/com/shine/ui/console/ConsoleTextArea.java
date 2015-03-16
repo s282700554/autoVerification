@@ -40,7 +40,7 @@ public class ConsoleTextArea extends JTextArea {
 
     TrayIcon trayIcon;// 托盘图标，但不是Image类型的 哦
     SystemTray tray;// 系统托盘
-    Image img = (new ImageIcon("images/icon.png")).getImage();// 托盘图标，建议使用较小的图片
+    Image img = (new ImageIcon("data/icon.png")).getImage();// 托盘图标，建议使用较小的图片
 
     public ConsoleTextArea(InputStream[] inStreams) throws Exception {
         for (int i = 0; i < inStreams.length; ++i) {

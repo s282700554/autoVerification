@@ -17,7 +17,7 @@ public class TalkConfigXmlOper {
     private static Logger logger = LoggerFactory.getLogger(TalkConfigXmlOper.class);
 
     // 文件路径
-    private static String filePath = "config/xml/TalkConfig.xml";
+    private static String filePath = "data/TalkConfig.dat";
 
     /**
      * 添加新命令节点.

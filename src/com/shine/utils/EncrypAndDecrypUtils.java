@@ -151,7 +151,7 @@ public class EncrypAndDecrypUtils {
      * 2014-11-9    SGJ 新建
      * </pre>
      */
-    public static byte[] decryp(String decrypFilePath) throws Exception {
+    public static byte[] decrypDataToByte(String decrypFilePath) throws Exception {
         // DES算法要求有一个可信任的随机数源
         SecureRandom sr = new SecureRandom();
         // 从原始密匙数据创建一个DESKeySpec对象

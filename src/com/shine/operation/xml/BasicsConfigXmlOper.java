@@ -16,7 +16,7 @@ public class BasicsConfigXmlOper {
     @SuppressWarnings("unused")
     private static Logger logger = LoggerFactory.getLogger(BasicsConfigXmlOper.class);
 
-    private static String filePath = "config/xml/BasicsConfig.xml";
+    private static String filePath = "data/BasicsConfig.dat";
 
     /**
      * 

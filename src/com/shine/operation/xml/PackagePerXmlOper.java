@@ -9,7 +9,7 @@ import com.shine.utils.XmlUtils;
 
 public class PackagePerXmlOper {
 
-    private static String filePath = "config/xml/PackagePer.xml";
+    private static String filePath = "data/PackagePer.dat";
 
     /**
      * 

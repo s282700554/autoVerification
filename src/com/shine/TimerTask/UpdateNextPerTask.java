@@ -14,12 +14,12 @@ import com.shine.operation.xml.PackageLogXmlOper;
 import com.shine.operation.xml.PackagePerXmlOper;
 
 public class UpdateNextPerTask extends TimerTask {
-    
+
     private static Logger logger = LoggerFactory.getLogger(UpdateNextPerTask.class);
 
     // 时间格式
     private static DateFormat format = new SimpleDateFormat("yyyyMMdd");
-    
+
     @Override
     public void run() {
         try {
@@ -29,6 +29,7 @@ public class UpdateNextPerTask extends TimerTask {
             boolean isVerification = list != null && list.size() > 0 ? true : false;
             // 根据今天是否有验包设置验包人员为下一个
             if (isVerification) {
+                PackageLogXmlOper.clearLog(format.format(date));
                 PackagePerXmlOper.updateNext();
             }
         } catch (Exception e) {

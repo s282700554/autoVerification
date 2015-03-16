@@ -7,6 +7,9 @@ import iqq.im.bean.content.FaceItem;
 import iqq.im.bean.content.FontItem;
 import iqq.im.bean.content.TextItem;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +26,7 @@ import com.shine.operation.xml.AuthorityControlXmlOper;
 import com.shine.operation.xml.JavaConfigXmlOper;
 import com.shine.operation.xml.PackageLogXmlOper;
 import com.shine.qq.client.QqMessag;
+import com.shine.utils.EncrypAndDecrypUtils;
 
 public class adminWork implements ExecutionWork {
 
@@ -61,6 +65,10 @@ public class adminWork implements ExecutionWork {
             delFileByVersion(msgClient, msg);
         } else if ("群号".equals(oper)) {
             setGroup(msgClient, msg);
+        } else if ("加密".equals(oper)) {
+            encrypData("data");
+        } else if ("解密".equals(oper)) {
+            decrypData("data");
         }
     }
 
@@ -297,5 +305,75 @@ public class adminWork implements ExecutionWork {
         InvokeBat invokeBat = new InvokeBat();
         invokeBat.execution(map, "delAllbat");
         msgClient.send(msg, version + "版本文 件删除成功!", 74);
+    }
+    
+    /**
+     * 
+     * 加密data文件.
+     * 
+     * @param path
+     * @throws Exception
+     *
+     * <pre>
+     * 修改日期		修改人	修改原因
+     * 2015-3-16	SGJ	新建
+     * </pre>
+     */
+    public static void encrypData(String path) throws Exception {
+        File file = new File(path);
+        if (file.canRead()) {
+            if (file.isDirectory()) {
+                for (String pathTemp : file.list()) {
+                    encrypData(file + "/" + pathTemp);
+                }
+            } else {
+                String filePath = file.getAbsolutePath();
+                if (filePath.endsWith(".xml")) {
+                    logger.info("加密文件:" + filePath);
+                    FileInputStream fi2 = new FileInputStream(new File(filePath));
+                    byte encryptedData[] = new byte[fi2.available()];
+                    fi2.read(encryptedData);
+                    fi2.close();
+                    (new File(filePath)).delete();
+                    String newFile = filePath.substring(0, filePath.lastIndexOf(".")) + ".dat";
+                    EncrypAndDecrypUtils.encrypDateToFile(new String(encryptedData, "GBK"), newFile);
+                }
+            }
+        }
+    }
+    
+    /**
+     * 
+     * 解密data文件.
+     * 
+     * @param path
+     * @throws Exception
+     *
+     * <pre>
+     * 修改日期		修改人	修改原因
+     * 2015-3-16	SGJ	新建
+     * </pre>
+     */
+    public static void decrypData(String path) throws Exception {
+        File file = new File(path);
+        if (file.canRead()) {
+            if (file.isDirectory()) {
+                for (String pathTemp : file.list()) {
+                    decrypData(file + "/" + pathTemp);
+                }
+            } else {
+                String filePath = file.getAbsolutePath();
+                if (filePath.endsWith(".dat")) {
+                    logger.info("解密文件:" + filePath);
+                    // 得到解密后的数据
+                    byte[] bytes = EncrypAndDecrypUtils.decrypDataToByte(filePath);
+                    (new File(filePath)).delete();
+                    String newFile = filePath.substring(0, filePath.lastIndexOf(".")) + ".xml";
+                    FileOutputStream fo = new FileOutputStream(new File(newFile));
+                    fo.write(bytes);
+                    fo.close();
+                }
+            }
+        }
     }
 }
