@@ -73,20 +73,18 @@ public class JavaWorkThread extends Thread {
                 } else {
                     msgClient.send(msg, version + "JAVA验包通过!", 74);
                 }
-                // 验完包,还原控制
-                JavaPacketWork.YB_CONTROL = true;
             } else {
                 msgClient.send(msg, "验包版本不正确,请输入正确的版本号", 101);
-                JavaPacketWork.YB_CONTROL = true;
             }
+            // 验完包,还原控制
+            JavaPacketWork.YB_CONTROL = true;
         } catch (Exception e) {
+            // 验完包,还原控制
+            JavaPacketWork.YB_CONTROL = true;
             logger.error(e.getMessage());
             try {
                 msgClient.send(msg, "我生病了,这活你得自己干了!", 85);
-                // 验完包,还原控制
-                JavaPacketWork.YB_CONTROL = true;
             } catch (Exception e1) {
-                JavaPacketWork.YB_CONTROL = true;
                 logger.error(e1.getMessage());
             }
         }

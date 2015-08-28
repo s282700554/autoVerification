@@ -6,11 +6,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
+
+import com.shine.operation.xml.BasicsConfigXmlOper;
 
 public class PassWordPanel extends JFrame implements ActionListener {
 
@@ -30,9 +33,11 @@ public class PassWordPanel extends JFrame implements ActionListener {
     private SystemTray tray;
 
     private TrayIcon trayIcon;
-    
+
+    private String password;
+
     private volatile static PassWordPanel passwordWin = null;
-    
+
     /**
      * 初始化窗口
      */
@@ -73,14 +78,14 @@ public class PassWordPanel extends JFrame implements ActionListener {
             }
         });
     }
-    
+
     /**
      * 
      * 实例化.
      * 
      * @return
-     *
-     * <pre>
+     * 
+     *         <pre>
      * 修改日期		修改人	修改原因
      * 2014-8-15	SGJ	新建
      * </pre>
@@ -93,7 +98,7 @@ public class PassWordPanel extends JFrame implements ActionListener {
         }
         return passwordWin;
     }
-    
+
     /**
      * 显示窗口
      * 
@@ -105,23 +110,47 @@ public class PassWordPanel extends JFrame implements ActionListener {
         this.f = j;
         this.tray = tray;
         this.trayIcon = trayIcon;
-        this.setVisible(true);
+        Map<String, String> winControl = BasicsConfigXmlOper.getBasicConfigInfo("winControl");
+        if ("true".equals(winControl.get("WIN_HASPASW"))) {
+            this.password = winControl.get("WIN_PASSWORD");
+            this.setVisible(true);
+        } else {
+            this.operationWin();
+        }
     }
-    
+
     /**
      * 
      * 密码验证.
      * 
      * @throws Exception
-     *
-     * <pre>
+     * 
+     *             <pre>
      * 修改日期		修改人	修改原因
      * 2014-8-15	SGJ	新建
      * </pre>
      */
     @SuppressWarnings("deprecation")
     public void checkPassword() throws Exception {
-        if (pf.getText() != null && pf.getText().equals("shineosp")) {
+        if (pf.getText() != null && pf.getText().equals(this.password)) {
+            this.operationWin();
+        } else {
+            JOptionPane.showMessageDialog(null, "密码错误!", "提示", JOptionPane.OK_OPTION);
+        }
+    }
+
+    /**
+     * 
+     * 操作窗口.
+     * 
+     * 
+     * <pre>
+     * 修改日期		修改人	修改原因
+     * 2015-6-18	SGJ	新建
+     * </pre>
+     */
+    public void operationWin() {
+        try {
             if (f != null) {
                 f.setExtendedState(JFrame.NORMAL);
                 f.setVisible(true);
@@ -132,11 +161,11 @@ public class PassWordPanel extends JFrame implements ActionListener {
                 System.exit(0);
                 tray.remove(trayIcon);// 退出程序，移出系统托盘处的图标
             }
-        } else {
-            JOptionPane.showMessageDialog(null, "密码错误!", "提示", JOptionPane.OK_OPTION);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
-    
+
     /**
      * 动作监听事件
      */

@@ -67,7 +67,9 @@ public class DatabaseWorkThread extends Thread {
                     }
                     // 操作日志
                     else if (operation.startsWith("log")) {
-                        bool = LogAnalysis.analysisLog(operation, map);
+                        if (!bool) {
+                            bool = LogAnalysis.analysisLog(operation, map);
+                        }
                     }
                     // 删除指定文件中的指定文件块
                     else if (operation.startsWith("del")) {

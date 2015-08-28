@@ -40,7 +40,7 @@ public class QqMessag {
     QQClient client;
 
     // 前一个命令时间
-    private static Date date = null;
+    private static long date = 0L;
 
     /**
      * 初始化
@@ -88,27 +88,54 @@ public class QqMessag {
         QQMsg msg = (QQMsg) event.getTarget();
         logger.warn("[消息] " + msg.getFrom().getNickname() + "说:" + msg.getText());
         logger.warn("\n");
-        if (msg.getText().startsWith("@")) {
-            if (date == null || (new Date().getTime() - date.getTime()) > 5000) {
-                date = new Date();
+        String message = msg.getText();
+        if (checkCommand(msg, message)) {
+            try {
+                ExecutionTask.verifyAuthority(this, msg);
+            } catch (Exception e) {
                 try {
-                    if (!msg.getText().startsWith("@管理加密") && adminWork.systemLock) {
-                        send(msg, "系统已锁,请解锁!", 5);
-                    } else {
-                        ExecutionTask.verifyAuthority(this, msg);
-                    }
-                } catch (Exception e) {
-                    try {
-                        send(msg, "执行命令失败:" + e.getMessage(), 5);
-                    } catch (Exception e1) {
-                        logger.warn(e1.getMessage());
-                    }
-                    logger.warn(e.getMessage());
+                    send(msg, "执行命令失败:" + e.getMessage(), 5);
+                } catch (Exception e1) {
+                    logger.warn(e1.getMessage());
                 }
+                logger.warn(e.getMessage());
             }
         }
     }
 
+    /**
+     * 
+     * 检测系统是否可操作.
+     * 
+     * @param msg
+     * @param message
+     * @return
+     *
+     * <pre>
+     * 修改日期		修改人	修改原因
+     * 2015-6-17	SGJ	新建
+     * </pre>
+     */
+    private boolean checkCommand(QQMsg msg, String message) {
+        if (message.startsWith("@")) {
+            long newDate = new Date().getTime();
+            if ((newDate - date) > 5000) {
+                date = new Date().getTime();
+                if (!message.startsWith("@管理加密") && adminWork.systemLock) {
+                    try {
+                        send(msg, "系统已锁,请解锁!", 5);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        logger.error(e.getMessage());
+                    }
+                } else {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
     /**
      * 命令返回信息.
      * 
@@ -128,7 +155,9 @@ public class QqMessag {
             sendMsg.setType(QQMsg.Type.GROUP_MSG); // 发送类型为好友
             // QQ内容
             sendMsg.addContentItem(new TextItem(msgText)); // 添加文本内容
-            sendMsg.addContentItem(new FaceItem(id)); // QQ id为0的表情
+            if (id >=0 ) {
+                sendMsg.addContentItem(new FaceItem(id)); // QQ id为0的表情
+            }
             sendMsg.addContentItem(new FontItem()); // 使用默认字体
         }
         // 好友消息
@@ -137,7 +166,9 @@ public class QqMessag {
             sendMsg.setType(QQMsg.Type.BUDDY_MSG); // 发送类型为好友
             // QQ内容
             sendMsg.addContentItem(new TextItem(msgText)); // 添加文本内容
-            sendMsg.addContentItem(new FaceItem(id)); // QQ id为0的表情
+            if (id >= 0) {
+                sendMsg.addContentItem(new FaceItem(id)); // QQ id为0的表情
+            }
             sendMsg.addContentItem(new FontItem()); // 使用默认字体
         }
         client.sendMsg(sendMsg, null); // 调用接口发送消息
@@ -176,7 +207,7 @@ public class QqMessag {
         logger.warn(verify.reason);
         logger.warn("请输入在项目根目录下verify.png图片里面的验证码:");
         logger.warn(fileName);
-        CaptchaPanel capachaVerify = new CaptchaPanel();
+        CaptchaPanel capachaVerify = CaptchaPanel.getInstance();
         capachaVerify.setIcon(fileName);
         capachaVerify.show(client, event);
     }

@@ -3,6 +3,7 @@ package com.shine.operation.xml;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -104,7 +105,7 @@ public class TalkConfigXmlOper {
         Document document = XmlUtils.getDocument(filePath);
         List<Element> elements = selectSingleNode(document, commd);
         if (elements != null && elements.size() > 0) {
-            List<Element> childElements = elements.get(0).elements();
+            List<Element> childElements = elements.get(getRandomNum(elements.size())).elements();
             for (Element element : childElements) {
                 map.put(element.attributeValue("name"), element.getText());
             }
@@ -112,6 +113,25 @@ public class TalkConfigXmlOper {
         return map;
     }
 
+    /**
+     * 
+     * 要固定范围内取随机数字.
+     * 
+     * @param size
+     * @return
+     * @throws Exception
+     *
+     * <pre>
+     * 修改日期		修改人	修改原因
+     * 2015-7-2	SGJ	新建
+     * </pre>
+     */
+    private static int getRandomNum(int size) throws Exception {
+        Random rand = new Random();
+        int randNum = rand.nextInt(size);
+        return randNum;
+    }
+    
     /**
      * 查找指定命令节点.
      * 

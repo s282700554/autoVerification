@@ -12,6 +12,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
+import com.shine.ui.console.PassWordPanel;
+
 public class CaptchaPanel extends JFrame implements ActionListener {
 	
 	/**
@@ -29,6 +31,30 @@ public class CaptchaPanel extends JFrame implements ActionListener {
 		
 		private QQNotifyEvent event;
 		
+		private volatile static CaptchaPanel captchaPanel = null;
+		
+		/**
+	     * 
+	     * 实例化.
+	     * 
+	     * @return
+	     * 
+	     *         <pre>
+	     * 修改日期     修改人 修改原因
+	     * 2014-8-15    SGJ 新建
+	     * </pre>
+	     */
+	    public static CaptchaPanel getInstance() {
+	        synchronized (PassWordPanel.class) {
+	            if (captchaPanel == null) {
+	                captchaPanel = new CaptchaPanel();
+	            } else {
+	                captchaPanel.setVisible(false);
+	            }
+	        }
+	        return captchaPanel;
+	    }
+	    
 		/**
 		 * 初始化窗口
 		 */

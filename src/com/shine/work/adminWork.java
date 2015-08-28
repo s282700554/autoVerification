@@ -280,6 +280,10 @@ public class adminWork implements ExecutionWork {
             workFactory.isOn = true;
         } else if ("关".equals(msgInfo)) {
             workFactory.isOn = false;
+        } else if ("网络开".equals(msgInfo)) {
+            workFactory.isInternet = true;
+        } else if ("网络关".equals(msgInfo)) {
+            workFactory.isInternet = false;
         }
         msgClient.send(msg, "聊天功能" + workFactory.isOn, 74);
     }

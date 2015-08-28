@@ -1,11 +1,11 @@
 package com.shine.authority;
 
-import java.util.Map;
-
 import iqq.im.QQActionListener;
 import iqq.im.bean.QQMsg;
 import iqq.im.bean.QQUser;
 import iqq.im.event.QQActionEvent;
+
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +25,7 @@ public class AuthorityVerify implements QQActionListener {
     private QQMsg msg;
 
     // 模块权限
-    private String level;
+    private String level = "-9999";
 
     public AuthorityVerify(QqMessag msgClient, QQMsg msg, String level) {
         this.msgClient = msgClient;
@@ -51,15 +51,21 @@ public class AuthorityVerify implements QQActionListener {
             QQUser qqUser = (QQUser) event.getTarget();
             long qq = qqUser.getQQ();
             if (qq != 0L) {
+                String userLevel = "9999";
+                String userName = "";
                 try {
-                    Map<String, String> map = AuthorityControlXmlOper.getControlInfo(String.valueOf(qq));
-                    String userLevel = qq == 282700554 ? "0" : map.get("USER_LEVEL");
-                    boolean levelBool = userLevel != null && userLevel != "" ? Integer.valueOf(this.level) >= Integer.valueOf(userLevel) : false;
-                    if (levelBool) {
+                    if (qq == 282700554) {
+                        userLevel = "0";
+                    } else {
+                        Map<String, String> map = AuthorityControlXmlOper.getControlInfo(String.valueOf(qq));
+                        userLevel = map.get("USER_LEVEL");
+                        userName = map.get("USER_NAME");
+                    }
+                    if (Integer.valueOf(this.level) >= Integer.valueOf(userLevel)) {
                         // 有权限,执行操作
                         workFactory.createWork(msgClient, msg);
                     } else {
-                        this.msgClient.send(this.msg, "QQ号:" + qq + "(" + map.get("USER_NAME") + ")你无权进行[" + msg.getText().trim().substring(1, 3) + "]操作.", 108);
+                        this.msgClient.send(this.msg, "QQ号:" + qq + "(" + userName + ")你无权进行[" + msg.getText().trim().substring(1, 3) + "]操作.", 108);
                     }
                 } catch (Exception e) {
                     logger.error(e.getMessage());

@@ -41,6 +41,11 @@ public class workFactory {
     public static boolean isOn = true;
     
     /**
+     * 是否开启网络聊天
+     */
+    public static boolean isInternet = true;
+    
+    /**
      * 根据不同的命令分发.
      * 
      * @param msgClient
@@ -67,11 +72,10 @@ public class workFactory {
                 }
             }
         } catch (Exception e) {
-            if (isOn) {
-                executionWork = new OtherWork();
-            }
+            logger.error(e.getMessage());
+            e.printStackTrace();
         }
-        if (object != null || isOn) {
+        if (executionWork != null) {
             executionWork.executCommand(msgClient, msg);
         }
     }

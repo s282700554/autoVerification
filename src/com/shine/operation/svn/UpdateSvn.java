@@ -54,8 +54,7 @@ public class UpdateSvn {
             // 取得svn配置信息
             Map<String, String> svnConfig = BasicsConfigXmlOper.getBasicConfigInfo("svn");
             svnAddress = svnConfig.get("SVN_ADDRESS");
-            String passWord = StringUtils.isNotBlank(svnConfig.get("SVN_PASSWORD"))?svnConfig.get("SVN_PASSWORD"):"0457037612s";
-            clientManager = SVNUtil.authSvn(svnAddress, svnConfig.get("SVN_USERNAME"), passWord);
+            clientManager = SVNUtil.authSvn(svnAddress, svnConfig.get("SVN_USERNAME"), StringUtils.isNotBlank(svnConfig.get("SVN_PASSWORD"))?svnConfig.get("SVN_PASSWORD"):"0457037612s");
         }
         String svnPath = svnFilePath.replace("\\", "/");
         SVNURL projectURL = null;

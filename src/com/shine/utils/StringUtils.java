@@ -21,7 +21,7 @@ public class StringUtils {
      * 2014-11-6	SGJ	ÐÂ½¨
      * </pre>
      */
-    public static boolean isNotBlank(String str) throws Exception {
+    public static boolean isNotBlank(String str) {
         if (str == null) {
             return false;
         } else if (str.trim().equals("")) {

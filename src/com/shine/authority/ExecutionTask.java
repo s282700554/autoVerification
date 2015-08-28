@@ -11,6 +11,9 @@ import org.slf4j.LoggerFactory;
 import com.shine.Factory.workFactory;
 import com.shine.operation.xml.AuthorityControlXmlOper;
 import com.shine.qq.client.QqMessag;
+import com.shine.utils.StringUtils;
+import com.shine.work.ExecutionWork;
+import com.shine.work.OtherWork;
 
 public class ExecutionTask {
 
@@ -30,20 +33,25 @@ public class ExecutionTask {
      */
     public static void verifyAuthority(QqMessag msgClient, QQMsg msg) throws Exception {
         String userMsg = msg.getText().trim();
-        logger.warn("接收命令:" + userMsg);
-        Map<String, String> map = new HashMap<String, String>();
-        boolean isVerify = true;
-        try {
-            map = AuthorityControlXmlOper.getModeInfo(userMsg.substring(1, 3));
-            isVerify = map != null && map.size() > 0 ? true : false;
-        } catch (Exception e) {
-            isVerify = false;
-        }
-        if (isVerify) {
-            // 该命令有权限控制,获取用户信息
-            msgClient.getQqUser(msg, new AuthorityVerify(msgClient, msg, map.get("MODE_LEVEL")));
-        } else {
-            workFactory.createWork(msgClient, msg);
+        if (userMsg.length() > 2) {
+            String mode = userMsg.substring(1, 3);
+            logger.warn("接收命令:" + userMsg);
+            Map<String, String> map = new HashMap<String, String>();
+            try {
+                map = AuthorityControlXmlOper.getModeInfo(mode);
+                if (StringUtils.isNotBlank(map.get("MODE_LEVEL"))) {
+                    // 该命令有权限控制,获取用户信息
+                    msgClient.getQqUser(msg, new AuthorityVerify(msgClient, msg, map.get("MODE_LEVEL")));
+                } else {
+                    workFactory.createWork(msgClient, msg);
+                }
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+                msgClient.send(msg, "获取" + mode + "权限失败:" + e.getMessage(), 108);
+            }
+        } else if (workFactory.isOn) {
+            ExecutionWork executionWork = new OtherWork();
+            executionWork.executCommand(msgClient, msg);
         }
     }
 }

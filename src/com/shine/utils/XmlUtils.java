@@ -10,6 +10,8 @@ import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 
+import com.shine.work.adminWork;
+
 public class XmlUtils {
 
     /**
@@ -25,7 +27,16 @@ public class XmlUtils {
      * </pre>
      */
     public static Document getDocument(String fileName) throws Exception {
-        Document document = getDecrypDocument(fileName);
+        Document document = null;
+        try {
+            document = getDecrypDocument(fileName);
+        } catch (Exception e) {
+            adminWork.encrypData(null, null, "data");
+            document = getDecrypDocument(fileName);
+            if (document == null) {
+                e.printStackTrace();
+            }
+        }
         return document;
     }
 
@@ -111,7 +122,6 @@ public class XmlUtils {
         } catch (Exception e) {
             // 出现异常文件本身未被加密,不处理
             document = saxReader.read(new File(fileName));
-            e.printStackTrace();
         }
         return document;
     }

@@ -6,8 +6,10 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.shine.Factory.workFactory;
 import com.shine.operation.xml.TalkConfigXmlOper;
 import com.shine.qq.client.QqMessag;
+import com.shine.robot.ConnectionTuling;
 
 public class OtherWork implements ExecutionWork {
 
@@ -27,11 +29,18 @@ public class OtherWork implements ExecutionWork {
     @Override
     public void executCommand(QqMessag msgClient, QQMsg msg) throws Exception {
         String userMsg = msg.getText().trim();
-        Map<String, String> map = TalkConfigXmlOper.getComInfo(userMsg);
-        if (map != null && map.size() > 0) {
-            msgClient.send(msg, map.get("RETURN_MSG"), StringUtils.isNotBlank(map.get("RETURN_FACE")) ? Integer.valueOf(map.get("RETURN_FACE")) : 117);
+        if (workFactory.isInternet) {
+            long userid = msg.getFrom().getUin();
+            String message = ConnectionTuling.getMessage(String.valueOf(userid), userMsg);
+            msgClient.send(msg, message, -1);
         } else {
-            msgClient.send(msg, "你很无聊?", 80);
+            Map<String, String> map = TalkConfigXmlOper.getComInfo(userMsg);
+            if (map != null && map.size() > 0) {
+                msgClient.send(msg, map.get("RETURN_MSG"),
+                        StringUtils.isNotBlank(map.get("RETURN_FACE")) ? Integer.valueOf(map.get("RETURN_FACE")) : 117);
+            } else {
+                msgClient.send(msg, "细伢子，你搞么子哦？", 81);
+            }
         }
     }
 }

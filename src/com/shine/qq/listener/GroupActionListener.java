@@ -1,5 +1,6 @@
 package com.shine.qq.listener;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import iqq.im.QQActionListener;
@@ -23,7 +24,16 @@ public class GroupActionListener implements QQActionListener {
     QQClient client;
     
     // 是否已记录
-    private static boolean flag = true;
+    private static boolean flag = false;
+    
+    // 配置信息
+    private Map<String, String> groupMap = new HashMap<String, String>();
+    
+    // 群号
+    private String groupNumber = null;
+    
+    // 是否已找到群号
+    boolean isRun = false;
     
     public GroupActionListener(QQClient client) {
         this.client = client;
@@ -43,28 +53,31 @@ public class GroupActionListener implements QQActionListener {
     @Override
     public void onActionEvent(QQActionEvent event) {
         if (event.getType() == Type.EVT_OK) {
-            String groupNumber = null;
-            if (flag) {
-                StartTimerTask.client = client;
-                flag = false;
+            if (!flag) {
+                flag = true;
                 try {
-                    Map<String, String> groupMap = BasicsConfigXmlOper.getBasicConfigInfo("group");
-                    groupNumber = groupMap.get("REMIND_GROUP");
-                    if (!StringUtils.isNotBlank(groupNumber)) {
-                        throw new NullPointerException("基础配置信息中群号为空!");
+                    groupMap = BasicsConfigXmlOper.getBasicConfigInfo("group");
+                    // 判断是否启动消息提醒功能
+                    if ("true".equals(groupMap.get("MESSAGE_ALERTS"))) {
+                        StartTimerTask.client = client;
+                        groupNumber = groupMap.get("REMIND_GROUP");
+                        if (!StringUtils.isNotBlank(groupNumber)) {
+                            logger.error("基础配置信息中群号为空!");
+                        }
                     }
                 } catch (Exception e) {
+                    flag = false;
                     e.printStackTrace();
                 }
             }
-            boolean isRun = false;
             for (QQGroup g : client.getGroupList()) {
-                if(g.getName().equals(groupNumber)) {
+                if(!isRun && g.getName().equals(groupNumber)) {
                     try {
                         StartTimerTask.g = g;
                         StartTimerTask.runOnStart();
                         isRun = true;
                     } catch (Exception e) {
+                        isRun = false;
                         logger.error(e.getMessage());
                         e.printStackTrace();
                     }
@@ -72,8 +85,8 @@ public class GroupActionListener implements QQActionListener {
                 client.getGroupInfo(g, null);
                 logger.warn("Group: " + g.getName());
             }
-            if (!isRun) {
-                throw new NullPointerException("没有找到对应的群号:[" + groupNumber + "]");
+            if (!isRun && StringUtils.isNotBlank(groupNumber)) {
+                logger.error("没有找到对应的群号:[" + groupNumber + "]");
             }
         }
     }
