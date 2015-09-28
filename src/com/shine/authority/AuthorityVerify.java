@@ -58,7 +58,9 @@ public class AuthorityVerify implements QQActionListener {
                         userLevel = "0";
                     } else {
                         Map<String, String> map = AuthorityControlXmlOper.getControlInfo(String.valueOf(qq));
-                        userLevel = map.get("USER_LEVEL");
+                        if (map.get("USER_LEVEL") != null) {
+                            userLevel = map.get("USER_LEVEL");
+                        }
                         userName = map.get("USER_NAME");
                     }
                     if (Integer.valueOf(this.level) >= Integer.valueOf(userLevel)) {
