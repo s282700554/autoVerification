@@ -57,9 +57,9 @@ public class GroupActionListener implements QQActionListener {
                 flag = true;
                 try {
                     groupMap = BasicsConfigXmlOper.getBasicConfigInfo("group");
+                    StartTimerTask.client = client;
                     // 判断是否启动消息提醒功能
                     if ("true".equals(groupMap.get("MESSAGE_ALERTS"))) {
-                        StartTimerTask.client = client;
                         groupNumber = groupMap.get("REMIND_GROUP");
                         if (!StringUtils.isNotBlank(groupNumber)) {
                             logger.error("基础配置信息中群号为空!");
