@@ -37,7 +37,9 @@ public class ConsoleTextArea extends JTextArea {
     private static final long serialVersionUID = -1766674925258825865L;
 
     private static Logger logger = LoggerFactory.getLogger(ConsoleTextArea.class);
-
+    
+    private volatile static ConsoleTextArea consoleTextArea = null;
+    
     TrayIcon trayIcon;// 托盘图标，但不是Image类型的 哦
     SystemTray tray;// 系统托盘
     Image img = (new ImageIcon("data/icon.png")).getImage();// 托盘图标，建议使用较小的图片
@@ -47,14 +49,38 @@ public class ConsoleTextArea extends JTextArea {
             startConsoleReaderThread(inStreams[i]);
         }
     }
-
-    public ConsoleTextArea() throws Exception {
-        final LoopedStreams ls = new LoopedStreams();
-        // 重定向System.out和System.err
-        PrintStream ps = new PrintStream(ls.getOutputStream());
-        System.setOut(ps);
-        System.setErr(ps);
-        startConsoleReaderThread(ls.getInputStream());
+    
+    /**
+     * 
+     * 实例化.
+     * 
+     * @return
+     *
+     * <pre>
+     * 修改日期		修改人	修改原因
+     * 2015-10-9	SGJ	新建
+     * </pre>
+     */
+    public static ConsoleTextArea getInstance() {
+        synchronized (ConsoleTextArea.class) {
+            if (consoleTextArea == null) {
+                consoleTextArea = new ConsoleTextArea();
+            }
+        }
+        return consoleTextArea;
+    }
+    
+    public ConsoleTextArea() {
+        try {
+            final LoopedStreams ls = new LoopedStreams();
+            // 重定向System.out和System.err
+            PrintStream ps = new PrintStream(ls.getOutputStream());
+            System.setOut(ps);
+            System.setErr(ps);
+            startConsoleReaderThread(ls.getInputStream());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void startConsoleReaderThread(InputStream inStream) throws Exception {
@@ -93,13 +119,6 @@ public class ConsoleTextArea extends JTextArea {
      * </pre>
      */
     public void showLog() throws Exception {
-        ConsoleTextArea consoleTextArea = null;
-        try {
-            consoleTextArea = new ConsoleTextArea();
-        } catch (IOException e) {
-            logger.error("不能创建LoopedStreams：" + e);
-            System.exit(1);
-        }
         consoleTextArea.setFont(java.awt.Font.decode("monospaced"));
         // 创建窗口
         final JFrame f = new JFrame("SHINE自动验包系统");

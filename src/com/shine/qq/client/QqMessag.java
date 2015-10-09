@@ -35,7 +35,7 @@ import com.shine.authority.ExecutionTask;
 import com.shine.qq.listener.LoginActionListener;
 import com.shine.ui.console.ConsoleTextArea;
 import com.shine.ui.login.CaptchaPanel;
-import com.shine.ui.login.QRcodeLoginClient;
+import com.shine.ui.login.QRcodeShowWind;
 import com.shine.utils.SystemInfo;
 import com.shine.work.adminWork;
 
@@ -48,7 +48,8 @@ public class QqMessag {
 
     // 前一个命令时间
     private static long date = 0L;
-    QRcodeLoginClient qRcodeLoginClient;
+    QRcodeShowWind qRcodeShowWind;
+    static ConsoleTextArea consoleTextArea = ConsoleTextArea.getInstance();
     FileLock lock = null;
 
     /**
@@ -59,7 +60,6 @@ public class QqMessag {
      */
     public QqMessag() throws Exception {
         client = new WebQQClient(new QQNotifyHandlerProxy(this), new ThreadActorDispatcher());
-        qRcodeLoginClient = new QRcodeLoginClient();
     }
 
     /**
@@ -265,39 +265,45 @@ public class QqMessag {
      */
     public void getQRcode() throws Exception {
         // 获取二维码
-        client.getQRcode(new QQActionListener() {
-            @Override
-            public void onActionEvent(QQActionEvent event) {
-                if (event.getType() == QQActionEvent.Type.EVT_OK) {
-                    // 启动信息监控窗口.
-                    try {
-                        ConsoleTextArea consoleTextArea = new ConsoleTextArea();
-                        consoleTextArea.showLog();
-                    } catch (Exception ex) {
-                        logger.error(ex.getMessage());
+        client.getQRcode(new GetQRcodeListener(this));
+    }
+
+    public class GetQRcodeListener implements QQActionListener {
+        QqMessag qqMessag;
+
+        public GetQRcodeListener(QqMessag qqMessag) {
+            this.qqMessag = qqMessag;
+        }
+
+        @Override
+        public void onActionEvent(QQActionEvent event) {
+            if (event.getType() == QQActionEvent.Type.EVT_OK) {
+                // 生成二维码
+                try {
+                    BufferedImage verify = (BufferedImage) event.getTarget();
+                    // 生成二维码图片
+                    Random random = new Random();
+                    int name = random.nextInt();
+                    String fileName = String.valueOf(name).substring(1, String.valueOf(name).length()) + ".png";
+                    fileName = SystemInfo.getTempPath() + "/" + fileName;
+                    ImageIO.write(verify, "png", new File(fileName));
+                    logger.warn(verify.toString());
+                    logger.warn("请输入在项目根目录下verify.png图片里面的验证码:");
+                    logger.warn(fileName);
+                    if (qRcodeShowWind != null) {
+                        qRcodeShowWind.close();
                     }
-                    // 生成二维码
-                    try {
-                        BufferedImage verify = (BufferedImage) event.getTarget();
-                        // 生成二维码图片
-                        Random random = new Random();
-                        int name = random.nextInt();
-                        String fileName = String.valueOf(name).substring(1, String.valueOf(name).length()) + ".png";
-                        fileName = SystemInfo.getTempPath() + "/" + fileName;
-                        ImageIO.write(verify, "png", new File(fileName));
-                        logger.warn(verify.toString());
-                        logger.warn("请输入在项目根目录下verify.png图片里面的验证码:");
-                        logger.warn(fileName);
-                        qRcodeLoginClient.setIcon(fileName);
-                        qRcodeLoginClient.show();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    logger.warn("获取二维码失败");
+                    qRcodeShowWind = new QRcodeShowWind();
+                    qRcodeShowWind.setIcon(fileName);
+                    qRcodeShowWind.showWind();
+                    // 检查二维码状态
+                    qqMessag.checkQRCode();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
-        });
+        }
+
     }
 
     /**
@@ -313,6 +319,60 @@ public class QqMessag {
      */
     public void checkQRCode() throws Exception {
         client.checkQRCode(new CheckQRcodeListener(this));
+    }
+
+    public class CheckQRcodeListener implements QQActionListener {
+        QqMessag qqMessag;
+
+        public CheckQRcodeListener(QqMessag qqMessag) {
+            this.qqMessag = qqMessag;
+        }
+
+        @Override
+        public void onActionEvent(QQActionEvent event) {
+            logger.warn("checkQRCode " + event);
+            switch (event.getType()) {
+                case EVT_OK:
+                    qRcodeShowWind.close();
+                    // 登陆成功,开始获取qq信息,并启动消息提醒.
+                    new LoginActionListener(client).onActionEvent(event);
+                    break;
+                case EVT_ERROR:
+                    QQException ex = (QQException) (event.getTarget());
+                    QQException.QQErrorCode code = ex.getError();
+                    switch (code) {
+                        case QRCODE_INVALID:
+                            logger.warn("二维码失效");
+                            // 二维码失效,关闭二维码显示窗口，并重新获取
+                            qRcodeShowWind.close();
+                            try {
+                                this.qqMessag.getQRcode();
+                            } catch (Exception e1) {
+                                logger.error(e1.getMessage());
+                                e1.printStackTrace();
+                            }
+                            break;
+                        case QRCODE_OK:
+                            // 二维码有效,等待用户扫描
+                            logger.warn("二维码未失效");
+                        case QRCODE_AUTH:
+                            // 二维码已经扫描,等用户允许登录
+                            try {
+                                Thread.sleep(3000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            // 继续检查二维码状态
+                            try {
+                                this.qqMessag.checkQRCode();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            break;
+                    }
+                    break;
+            }
+        }
     }
 
     // 判断该应用是否已启动
@@ -334,60 +394,19 @@ public class QqMessag {
         return true;
     }
 
-    public class CheckQRcodeListener implements QQActionListener {
-        QqMessag qqMessag;
-        public CheckQRcodeListener (QqMessag qqMessag) {
-            this.qqMessag = qqMessag;
-        }
-        @Override
-        public void onActionEvent(QQActionEvent event) {
-            logger.warn("checkQRCode " + event);
-            switch (event.getType()) {
-                case EVT_OK:
-                    qRcodeLoginClient.close();
-                    // 登陆成功,开始获取qq信息,并启动消息提醒.
-                    new LoginActionListener(client).onActionEvent(event);
-                    break;
-                case EVT_ERROR:
-                    QQException ex = (QQException) (event.getTarget());
-                    QQException.QQErrorCode code = ex.getError();
-                    switch (code) {
-                    // 二维码有效,等待用户扫描
-                        case QRCODE_OK:
-                            // 二维码失效
-                        case QRCODE_INVALID:
-                            qRcodeLoginClient.close();
-                            try {
-                                this.qqMessag.getQRcode();
-                            } catch (Exception e1) {
-                                logger.error(e1.getMessage());
-                                e1.printStackTrace();
-                            }
-                            // 二维码已经扫描,等用户允许登录
-                        case QRCODE_AUTH:
-                            try {
-                                Thread.sleep(3000);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                            // 继续检查二维码状态
-                            client.checkQRCode(this);
-                            break;
-                    }
-                    break;
-            }
-        }
-    }
-
     public static void main(String[] args) throws Exception {
         QqMessag qqMessag = new QqMessag();
         if (!qqMessag.isRunning()) {
             JOptionPane.showMessageDialog(null, "自动验包系统已运行,请勿多开!", "提示", JOptionPane.OK_OPTION);
         } else {
+            // 启动信息监控窗口.
+            try {
+                consoleTextArea.showLog();
+            } catch (Exception ex) {
+                logger.error(ex.getMessage());
+            }
             // 获取二维码并显示
             qqMessag.getQRcode();
-            // 检查二维码状态
-            qqMessag.checkQRCode();
         }
 
     }

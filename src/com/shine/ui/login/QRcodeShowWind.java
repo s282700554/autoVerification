@@ -4,7 +4,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
-public class QRcodeLoginClient extends JFrame {
+public class QRcodeShowWind extends JFrame {
 
     /**
      * 
@@ -17,15 +17,15 @@ public class QRcodeLoginClient extends JFrame {
     /**
      * 初始化窗口
      */
-    public QRcodeLoginClient() {
+    public QRcodeShowWind() {
         setLayout(null);
         setTitle("验证码");
-        setSize(180, 180);
+        setSize(175, 200);
         setResizable(false);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         // 放置显示验证码
-        lb.setBounds(20, 20, 150, 53);
+        lb.setBounds(1, 1, 165, 165);
         add(lb);
     }
 
@@ -42,7 +42,7 @@ public class QRcodeLoginClient extends JFrame {
     /**
      * 显示窗口
      */
-    public void show () {
+    public void showWind () {
         this.setVisible(true);
     }
     
