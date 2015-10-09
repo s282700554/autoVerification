@@ -65,13 +65,22 @@ public class ConnectionTuling {
      * </pre>
      */
     public static String getMessage(String user, String question) throws Exception {
-        String message = sendGet(user, question);
+        String message= null;
+        try {
+            message = sendGet(user, question);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception("连接网络聊天数据失败!");
+        }
         JSONObject jsonObj = new JSONObject(message);
-        SuperAnalyze superAnalyze = AnalyzeFactory.create(String.valueOf(jsonObj.get("code")));
+        SuperAnalyze superAnalyze = null;
+        try {
+            superAnalyze = AnalyzeFactory.create(String.valueOf(jsonObj.get("code")));
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error(jsonObj.toString());
+            throw new Exception("未知的返回代码!");
+        }
         return superAnalyze.processMessage(jsonObj);
-    }
-
-    public static void main(String args[]) throws Exception {
-        System.out.println(getMessage("11", "@  "));
     }
 }

@@ -39,6 +39,11 @@ public class ExecutionTask {
             Map<String, String> map = new HashMap<String, String>();
             try {
                 map = AuthorityControlXmlOper.getModeInfo(mode);
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+                msgClient.send(msg, "获取" + mode + "权限失败:" + e.getMessage(), 108);
+            }
+            try {
                 if (StringUtils.isNotBlank(map.get("MODE_LEVEL"))) {
                     // 该命令有权限控制,获取用户信息
                     msgClient.getQqUser(msg, new AuthorityVerify(msgClient, msg, map.get("MODE_LEVEL")));
@@ -47,9 +52,9 @@ public class ExecutionTask {
                 }
             } catch (Exception e) {
                 logger.error(e.getMessage());
-                msgClient.send(msg, "获取" + mode + "权限失败:" + e.getMessage(), 108);
+                msgClient.send(msg, "警告:" + e.getMessage(), 108);
             }
-        } else if (workFactory.isOn) {
+        } else if (workFactory.isOn && userMsg.length() > 1) {
             ExecutionWork executionWork = new OtherWork();
             executionWork.executCommand(msgClient, msg);
         }
