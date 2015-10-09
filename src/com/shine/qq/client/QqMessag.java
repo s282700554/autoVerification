@@ -11,24 +11,31 @@ import iqq.im.bean.content.FaceItem;
 import iqq.im.bean.content.FontItem;
 import iqq.im.bean.content.TextItem;
 import iqq.im.core.QQConstants;
+import iqq.im.event.QQActionEvent;
 import iqq.im.event.QQNotifyEvent;
 import iqq.im.event.QQNotifyEventArgs;
 import iqq.im.event.QQNotifyHandler;
 import iqq.im.event.QQNotifyHandlerProxy;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.FileLock;
 import java.util.Date;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
+import javax.swing.JOptionPane;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.shine.authority.ExecutionTask;
 import com.shine.qq.listener.LoginActionListener;
+import com.shine.ui.console.ConsoleTextArea;
 import com.shine.ui.login.CaptchaPanel;
+import com.shine.ui.login.QRcodeLoginClient;
 import com.shine.utils.SystemInfo;
 import com.shine.work.adminWork;
 
@@ -41,6 +48,19 @@ public class QqMessag {
 
     // 前一个命令时间
     private static long date = 0L;
+    QRcodeLoginClient qRcodeLoginClient;
+    FileLock lock = null;
+
+    /**
+     * 初始化
+     * 
+     * @param user
+     * @param pwd
+     */
+    public QqMessag() throws Exception {
+        client = new WebQQClient(new QQNotifyHandlerProxy(this), new ThreadActorDispatcher());
+        qRcodeLoginClient = new QRcodeLoginClient();
+    }
 
     /**
      * 初始化
@@ -110,8 +130,8 @@ public class QqMessag {
      * @param msg
      * @param message
      * @return
-     *
-     * <pre>
+     * 
+     *         <pre>
      * 修改日期		修改人	修改原因
      * 2015-6-17	SGJ	新建
      * </pre>
@@ -135,7 +155,7 @@ public class QqMessag {
         }
         return false;
     }
-    
+
     /**
      * 命令返回信息.
      * 
@@ -149,47 +169,33 @@ public class QqMessag {
     public void send(QQMsg msg, String msgText, int id) throws Exception {
         // 组装QQ消息发送回去
         QQMsg sendMsg = new QQMsg();
-        // 群消息
-        if (QQMsg.Type.GROUP_MSG.equals(msg.getType())) {
-            sendMsg.setGroup(msg.getGroup()); // QQ好友UIN
-            sendMsg.setType(QQMsg.Type.GROUP_MSG); // 发送类型为好友
-            // QQ内容
-            sendMsg.addContentItem(new TextItem(msgText)); // 添加文本内容
-            if (id >=0 ) {
-                sendMsg.addContentItem(new FaceItem(id)); // QQ id为0的表情
-            }
-            sendMsg.addContentItem(new FontItem()); // 使用默认字体
+        switch (msg.getType()) {
+            case GROUP_MSG: // 群消息
+                sendMsg.setGroup(msg.getGroup()); // QQ好友UIN
+                break;
+            case BUDDY_MSG: // 好友消息
+                sendMsg.setTo(msg.getFrom()); // QQ好友UIN
+                break;
+            case DISCUZ_MSG:
+                sendMsg.setDiscuz(msg.getDiscuz()); // QQ好友UIN
+                break;
+            case SESSION_MSG:
+                sendMsg.setTo(msg.getFrom()); // QQ好友UIN
+                break;
+            default:
+                break;
         }
-        // 好友消息
-        else if (QQMsg.Type.BUDDY_MSG.equals(msg.getType())) {
-            sendMsg.setTo(msg.getFrom()); // QQ好友UIN
-            sendMsg.setType(QQMsg.Type.BUDDY_MSG); // 发送类型为好友
-            // QQ内容
-            sendMsg.addContentItem(new TextItem(msgText)); // 添加文本内容
-            if (id >= 0) {
-                sendMsg.addContentItem(new FaceItem(id)); // QQ id为0的表情
-            }
-            sendMsg.addContentItem(new FontItem()); // 使用默认字体
+        // 发送类型
+        sendMsg.setType(msg.getType());
+        // QQ内容
+        sendMsg.addContentItem(new TextItem(msgText)); // 添加文本内容
+        if (id >= 0) {
+            sendMsg.addContentItem(new FaceItem(id)); // QQ id为0的表情
         }
+        sendMsg.addContentItem(new FontItem()); // 使用默认字体
         client.sendMsg(sendMsg, null); // 调用接口发送消息
     }
 
-    /**
-     * 
-     * 发送自定义消息.
-     * 
-     * @param sendMsg
-     * @throws Exception
-     *
-     * <pre>
-     * 修改日期		修改人	修改原因
-     * 2014-6-10	SGJ	新建
-     * </pre>
-     */
-    public void sendMsg(QQMsg sendMsg) throws Exception {
-        client.sendMsg(sendMsg, null);
-    }
-    
     /**
      * 需要验证码通知
      * 
@@ -246,8 +252,143 @@ public class QqMessag {
         client.setHttpUserAgent(ua);
         client.login(QQStatus.ONLINE, new LoginActionListener(client));
     }
+
+    /**
+     * 获取二维码.
+     * 
+     * @throws Exception
+     * 
+     *             <pre>
+     * 修改日期		修改人	修改原因
+     * 2015-10-8	SGJ	新建
+     * </pre>
+     */
+    public void getQRcode() throws Exception {
+        // 获取二维码
+        client.getQRcode(new QQActionListener() {
+            @Override
+            public void onActionEvent(QQActionEvent event) {
+                if (event.getType() == QQActionEvent.Type.EVT_OK) {
+                    // 启动信息监控窗口.
+                    try {
+                        ConsoleTextArea consoleTextArea = new ConsoleTextArea();
+                        consoleTextArea.showLog();
+                    } catch (Exception ex) {
+                        logger.error(ex.getMessage());
+                    }
+                    // 生成二维码
+                    try {
+                        BufferedImage verify = (BufferedImage) event.getTarget();
+                        // 生成二维码图片
+                        Random random = new Random();
+                        int name = random.nextInt();
+                        String fileName = String.valueOf(name).substring(1, String.valueOf(name).length()) + ".png";
+                        fileName = SystemInfo.getTempPath() + "/" + fileName;
+                        ImageIO.write(verify, "png", new File(fileName));
+                        logger.warn(verify.toString());
+                        logger.warn("请输入在项目根目录下verify.png图片里面的验证码:");
+                        logger.warn(fileName);
+                        qRcodeLoginClient.setIcon(fileName);
+                        qRcodeLoginClient.show();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    logger.warn("获取二维码失败");
+                }
+            }
+        });
+    }
+
+    /**
+     * 
+     * 检查二维码状态.
+     * 
+     * @throws Exception
+     * 
+     *             <pre>
+     * 修改日期		修改人	修改原因
+     * 2015-10-8	SGJ	新建
+     * </pre>
+     */
+    public void checkQRCode() throws Exception {
+        client.checkQRCode(new CheckQRcodeListener(this));
+    }
+
+    // 判断该应用是否已启动
+    public boolean isRunning() {
+        try {
+            // 获得实例标志文件
+            File flagFile = new File("instance");
+            // 如果不存在就新建一个
+            if (!flagFile.exists())
+                flagFile.createNewFile();
+            // 获得文件锁
+            lock = new FileOutputStream("instance").getChannel().tryLock();
+            // 返回空表示文件已被运行的实例锁定
+            if (lock == null)
+                return false;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return true;
+    }
+
+    public class CheckQRcodeListener implements QQActionListener {
+        QqMessag qqMessag;
+        public CheckQRcodeListener (QqMessag qqMessag) {
+            this.qqMessag = qqMessag;
+        }
+        @Override
+        public void onActionEvent(QQActionEvent event) {
+            logger.warn("checkQRCode " + event);
+            switch (event.getType()) {
+                case EVT_OK:
+                    qRcodeLoginClient.close();
+                    // 登陆成功,开始获取qq信息,并启动消息提醒.
+                    new LoginActionListener(client).onActionEvent(event);
+                    break;
+                case EVT_ERROR:
+                    QQException ex = (QQException) (event.getTarget());
+                    QQException.QQErrorCode code = ex.getError();
+                    switch (code) {
+                    // 二维码有效,等待用户扫描
+                        case QRCODE_OK:
+                            // 二维码失效
+                        case QRCODE_INVALID:
+                            qRcodeLoginClient.close();
+                            try {
+                                this.qqMessag.getQRcode();
+                            } catch (Exception e1) {
+                                logger.error(e1.getMessage());
+                                e1.printStackTrace();
+                            }
+                            // 二维码已经扫描,等用户允许登录
+                        case QRCODE_AUTH:
+                            try {
+                                Thread.sleep(3000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            // 继续检查二维码状态
+                            client.checkQRCode(this);
+                            break;
+                    }
+                    break;
+            }
+        }
+    }
+
     public static void main(String[] args) throws Exception {
-        QqMessag qqMessag = new QqMessag("2760866691", "shine1234");
-        qqMessag.login();
+        QqMessag qqMessag = new QqMessag();
+        if (!qqMessag.isRunning()) {
+            JOptionPane.showMessageDialog(null, "自动验包系统已运行,请勿多开!", "提示", JOptionPane.OK_OPTION);
+        } else {
+            // 获取二维码并显示
+            qqMessag.getQRcode();
+            // 检查二维码状态
+            qqMessag.checkQRCode();
+        }
+
     }
 }

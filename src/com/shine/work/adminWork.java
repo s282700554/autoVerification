@@ -4,8 +4,6 @@ import iqq.im.bean.QQGroup;
 import iqq.im.bean.QQMsg;
 import iqq.im.bean.content.ContentItem;
 import iqq.im.bean.content.FaceItem;
-import iqq.im.bean.content.FontItem;
-import iqq.im.bean.content.TextItem;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -213,24 +211,18 @@ public class adminWork implements ExecutionWork {
      */
     public static void sendMsg(QqMessag msgClient, QQMsg msg) throws Exception {
         String[] sendInfo = msg.getText().trim().substring(5, msg.getText().trim().length()).split("\\[");
-        String faceId = "";
+        int faceId = -1;
         List<ContentItem> items = msg.getContentList();
         for (ContentItem item : items) {
             if (item.getType() == ContentItem.Type.FACE) {
-                faceId = String.valueOf(((FaceItem) item).getId());
+                faceId = ((FaceItem) item).getId();
             }
         }
         // 组装QQ消息发送回去
         QQMsg qqMsg = new QQMsg();
         qqMsg.setGroup(StartTimerTask.g); // QQ好友UIN
         qqMsg.setType(QQMsg.Type.GROUP_MSG); // 发送类型为好友
-        // QQ内容
-        qqMsg.addContentItem(new TextItem(sendInfo[0])); // 添加文本内容
-        if (StringUtils.isNotBlank(faceId)) {
-            qqMsg.addContentItem(new FaceItem(Integer.valueOf(faceId))); // QQ id为0的表情
-        }
-        qqMsg.addContentItem(new FontItem()); // 使用默认字体
-        msgClient.sendMsg(qqMsg); // 调用接口发送消息
+        msgClient.send(qqMsg, sendInfo[0], faceId);
     }
 
     /**
