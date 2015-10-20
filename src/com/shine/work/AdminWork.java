@@ -15,9 +15,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shine.Factory.workFactory;
 import com.shine.TimerTask.StartTimerTask;
 import com.shine.TimerTask.TaskUtils;
+import com.shine.authority.AuthorityBean;
+import com.shine.authority.LoginUsers;
 import com.shine.operation.bat.GenerationBat;
 import com.shine.operation.bat.InvokeBat;
 import com.shine.operation.xml.AuthorityControlXmlOper;
@@ -26,12 +27,12 @@ import com.shine.operation.xml.PackageLogXmlOper;
 import com.shine.qq.client.QqMessag;
 import com.shine.utils.EncrypAndDecrypUtils;
 
-public class adminWork implements ExecutionWork {
+public class AdminWork implements ExecutionWork {
 
-    private static Logger logger = LoggerFactory.getLogger(adminWork.class);
+    private static Logger logger = LoggerFactory.getLogger(AdminWork.class);
 
     public static boolean systemLock = false;
-    
+
     /**
      * 
      * 执行还原控制命令.
@@ -47,8 +48,61 @@ public class adminWork implements ExecutionWork {
      */
     @Override
     public void executCommand(QqMessag msgClient, QQMsg msg) throws Exception {
-        String userMsg = msg.getText().trim();
-        String oper = userMsg.substring(3, 5).trim();
+        synchronized (AdminWork.class) {
+            String userMsg = msg.getText().trim();
+            String oper = userMsg.substring(3, 5).trim();
+            switch (AdminType.getEnum(oper)) {
+                case LOG:
+                    // 日志
+                    showLog(msgClient, msg);
+                    break;
+                case USER:
+                    // 用户
+                    operatingUser(msgClient, msg);
+                    break;
+                case FUNC:
+                    // 功能
+                    hasAuthority(msg);
+                    operatingMode(msgClient, msg);
+                    break;
+                case REMIND:
+                    // 提醒
+                    TaskUtils.sendPer("今天你验包哦!");
+                    break;
+                case MESSAGE:
+                    // 消息
+                    hasAuthority(msg);
+                    sendMsg(msgClient, msg);
+                    break;
+                case TALK:
+                    // 聊天
+                    controlOtherWork(msgClient, msg);
+                    break;
+                case DEL:
+                    // 删除
+                    hasAuthority(msg);
+                    delFileByVersion(msgClient, msg);
+                    break;
+                case GROUPNUM:
+                    // 群号
+                    hasAuthority(msg);
+                    setGroup(msgClient, msg);
+                    break;
+                case ENCRY:
+                    // 加密
+                    hasAuthority(msg);
+                    encrypData(msgClient, msg, "data");
+                    break;
+                case DECRY:
+                    // 解密
+                    hasAuthority(msg);
+                    decrypData(msgClient, msg, "data");
+                    break;
+                default:
+                    break;
+            }
+        }
+        /*
         if ("日志".equals(oper)) {
             showLog(msgClient, msg);
         } else if ("用户".equals(oper)) {
@@ -69,9 +123,17 @@ public class adminWork implements ExecutionWork {
             encrypData(msgClient, msg, "data");
         } else if ("解密".equals(oper)) {
             decrypData(msgClient, msg, "data");
-        }
+        }*/
     }
 
+    public static void hasAuthority(QQMsg msg) throws Exception {
+        AuthorityBean authorityBean = LoginUsers.getLoginInfo(msg.getFrom().getUin());
+        authorityBean.setModeLevel("-98");
+        if (!authorityBean.hasAuthority()) {
+            throw new Exception("你无权进行该操作!");
+        }
+    }
+    
     /**
      * 
      * 显示日志.
@@ -113,6 +175,7 @@ public class adminWork implements ExecutionWork {
      * </pre>
      */
     public static void operatingUser(QqMessag msgClient, QQMsg msg) throws Exception {
+        AuthorityBean authorityBean = LoginUsers.getLoginInfo(msg.getFrom().getUin());
         String userMsg = msg.getText().trim();
         // 添加282700554:上官剑:0
         String userOperating = userMsg.substring(5, userMsg.length()).trim();
@@ -129,10 +192,23 @@ public class adminWork implements ExecutionWork {
             String userName = userInfoSet[1].trim();
             String userLevel = userInfoSet[2].trim();
             if (StringUtils.isNotBlank(userQq) && StringUtils.isNotBlank(userName) && StringUtils.isNotBlank(userLevel)) {
+                authorityBean.setModeLevel(userLevel);
+                if (!authorityBean.hasAuthority()) {
+                    throw new Exception("你不能[添加]大于你本身权限的用户!");
+                }
+                Map<String, String> map = AuthorityControlXmlOper.getControlInfo(userQq);
+                if (map.size() > 0) {
+                    throw new Exception("qq:" + userQq + ",姓名:" + userName + "已存在,级别:" + map.get("USER_LEVEL"));
+                }
                 AuthorityControlXmlOper.addXMLNode(userQq, userName, userLevel);
                 msgClient.send(msg, "qq:" + userQq + ",姓名:" + userName + ",级别:" + userLevel + "添加成功!", 74);
             }
         } else if ("删除".equals(operating)) {
+            Map<String, String> map = AuthorityControlXmlOper.getControlLevByUserName(userInfo);
+            authorityBean.setModeLevel(map.get("USER_LEVEL"));
+            if (!authorityBean.hasAuthority()) {
+                throw new Exception("你不能[删除]大于你本身权限的用户!");
+            }
             AuthorityControlXmlOper.delXMLNodeByUserName(userInfo);
             msgClient.send(msg, userInfo + "删除成功!", 74);
         } else if ("修改".equals(operating)) {
@@ -140,6 +216,10 @@ public class adminWork implements ExecutionWork {
             String userName = userInfoSet[0].trim();
             String userLevel = userInfoSet[1].trim();
             if (StringUtils.isNotBlank(userName) && StringUtils.isNotBlank(userLevel)) {
+                authorityBean.setModeLevel(userLevel);
+                if (!authorityBean.hasAuthority()) {
+                    throw new Exception("你不能[添加]大于你本身权限的用户!");
+                }
                 AuthorityControlXmlOper.updateXMLNodeByUserName(userName, userLevel);
                 msgClient.send(msg, "姓名:" + userName + ",级别成功修改为:" + userLevel, 74);
             }
@@ -269,15 +349,15 @@ public class adminWork implements ExecutionWork {
     public static void controlOtherWork(QqMessag msgClient, QQMsg msg) throws Exception {
         String msgInfo = msg.getText().trim().substring(5, msg.getText().trim().length());
         if ("开".equals(msgInfo)) {
-            workFactory.isOn = true;
+            OtherWork.isOn = true;
         } else if ("关".equals(msgInfo)) {
-            workFactory.isOn = false;
+            OtherWork.isOn = false;
         } else if ("网络开".equals(msgInfo)) {
-            workFactory.isInternet = true;
+            OtherWork.isInternet = true;
         } else if ("网络关".equals(msgInfo)) {
-            workFactory.isInternet = false;
+            OtherWork.isInternet = false;
         }
-        msgClient.send(msg, "聊天功能" + workFactory.isOn, 74);
+        msgClient.send(msg, "聊天功能" + OtherWork.isOn, 74);
     }
 
     /**
@@ -304,15 +384,15 @@ public class adminWork implements ExecutionWork {
         invokeBat.execution(map, "delAllbat");
         msgClient.send(msg, version + "版本文 件删除成功!", 74);
     }
-    
+
     /**
      * 
      * 加密data文件.
      * 
      * @param path
      * @throws Exception
-     *
-     * <pre>
+     * 
+     *             <pre>
      * 修改日期		修改人	修改原因
      * 2015-3-16	SGJ	新建
      * </pre>
@@ -343,15 +423,15 @@ public class adminWork implements ExecutionWork {
             msgClient.send(msg, "系统数据加密完成!", 74);
         }
     }
-    
+
     /**
      * 
      * 解密data文件.
      * 
      * @param path
      * @throws Exception
-     *
-     * <pre>
+     * 
+     *             <pre>
      * 修改日期		修改人	修改原因
      * 2015-3-16	SGJ	新建
      * </pre>

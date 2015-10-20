@@ -8,6 +8,8 @@ import iqq.im.event.QQActionEvent.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shine.authority.LoginManagement;
+
 public final class LoginActionListener implements QQActionListener {
     
     private static Logger logger = LoggerFactory.getLogger(LoginActionListener.class);
@@ -59,6 +61,11 @@ public final class LoginActionListener implements QQActionListener {
             // 启动轮询时，需要获取所有好友、群成员、讨论组成员
             // 所有的逻辑完了后，启动消息轮询
             client.beginPollMsg();
+            try {
+                LoginManagement.init();
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+            }
         }
     }
 }

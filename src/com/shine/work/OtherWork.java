@@ -6,13 +6,22 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.shine.Factory.workFactory;
 import com.shine.operation.xml.TalkConfigXmlOper;
 import com.shine.qq.client.QqMessag;
 import com.shine.robot.ConnectionTuling;
 
 public class OtherWork implements ExecutionWork {
-
+    
+    /**
+     * 是否开启聊天模式,默认为开启
+     */
+    public static boolean isOn = true;
+    
+    /**
+     * 是否开启网络聊天
+     */
+    public static boolean isInternet = true;
+    
     /**
      * 
      * 执行聊天命令.
@@ -29,7 +38,7 @@ public class OtherWork implements ExecutionWork {
     @Override
     public void executCommand(QqMessag msgClient, QQMsg msg) throws Exception {
         String userMsg = msg.getText().trim();
-        if (workFactory.isInternet) {
+        if (isInternet) {
             long userid = msg.getFrom().getUin();
             String message = ConnectionTuling.getMessage(String.valueOf(userid), userMsg);
             msgClient.send(msg, message, -1);

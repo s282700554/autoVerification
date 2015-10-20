@@ -12,9 +12,9 @@ import com.shine.operation.xml.AuthorityControlXmlOper;
 import com.shine.operation.xml.JavaConfigXmlOper;
 import com.shine.qq.client.QqMessag;
 
-public class sendMailWork implements ExecutionWork {
+public class SendMailWork implements ExecutionWork {
 
-    private static Logger logger = LoggerFactory.getLogger(sendMailWork.class);
+    private static Logger logger = LoggerFactory.getLogger(SendMailWork.class);
 
     /**
      * ÓÊ¼þ·¢ËÍ¿ØÖÆ

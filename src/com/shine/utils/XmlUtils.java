@@ -10,7 +10,7 @@ import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 
-import com.shine.work.adminWork;
+import com.shine.work.AdminWork;
 
 public class XmlUtils {
 
@@ -31,7 +31,7 @@ public class XmlUtils {
         try {
             document = getDecrypDocument(fileName);
         } catch (Exception e) {
-            adminWork.encrypData(null, null, "data");
+            AdminWork.encrypData(null, null, "data");
             document = getDecrypDocument(fileName);
             if (document == null) {
                 e.printStackTrace();

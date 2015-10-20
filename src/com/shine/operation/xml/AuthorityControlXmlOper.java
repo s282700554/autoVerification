@@ -94,6 +94,35 @@ public class AuthorityControlXmlOper {
      * @throws Exception
      * 
      *             <pre>
+     * 修改日期     修改人 修改原因
+     * 2014-6-7 SGJ 新建
+     * </pre>
+     */
+    @SuppressWarnings("unchecked")
+    public static Map<String, String> getControlLevByUserName(String userName) throws Exception {
+        Map<String, String> map = new HashMap<String, String>();
+        // 读取XML文件
+        Document document = XmlUtils.getDocument(filePath);
+        // 查询用户权限
+        List<Element> elements = selectElementsByUserName(document, userName);
+        if (elements != null && elements.size() > 0) {
+            List<Element> childElements = elements.get(0).elements();
+            for (Element element : childElements) {
+                map.put(element.attributeValue("name"), element.getText());
+            }
+        }
+        return map;
+    }
+    
+    /**
+     * 
+     * 根据姓名查询权限.
+     * 
+     * @param userName
+     * @return
+     * @throws Exception
+     * 
+     *             <pre>
      * 修改日期		修改人	修改原因
      * 2014-6-7	SGJ	新建
      * </pre>

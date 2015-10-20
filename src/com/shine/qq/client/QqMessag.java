@@ -37,7 +37,7 @@ import com.shine.ui.console.ConsoleTextArea;
 import com.shine.ui.login.CaptchaPanel;
 import com.shine.ui.login.QRcodeShowWind;
 import com.shine.utils.SystemInfo;
-import com.shine.work.adminWork;
+import com.shine.work.AdminWork;
 
 public class QqMessag {
 
@@ -106,18 +106,16 @@ public class QqMessag {
     @QQNotifyHandler(QQNotifyEvent.Type.CHAT_MSG)
     public void processBuddyMsg(QQNotifyEvent event) throws QQException {
         QQMsg msg = (QQMsg) event.getTarget();
-        logger.warn("[消息] " + msg.getFrom().getNickname() + "说:" + msg.getText());
+        if (!"上官".equals(msg.getFrom().getNickname())) {
+            logger.warn("[消息] " + msg.getFrom().getNickname() + "说:" + msg.getText());
+        }
         logger.warn("\n");
         String message = msg.getText();
         if (checkCommand(msg, message)) {
             try {
                 ExecutionTask.verifyAuthority(this, msg);
             } catch (Exception e) {
-                try {
-                    send(msg, "执行命令失败:" + e.getMessage(), 5);
-                } catch (Exception e1) {
-                    logger.warn(e1.getMessage());
-                }
+                send(msg, "执行命令失败:" + e.getMessage(), 5);
                 logger.warn(e.getMessage());
             }
         }
@@ -138,18 +136,15 @@ public class QqMessag {
      */
     private boolean checkCommand(QQMsg msg, String message) {
         if (message.startsWith("@")) {
-            long newDate = new Date().getTime();
-            if ((newDate - date) > 5000) {
-                date = new Date().getTime();
-                if (!message.startsWith("@管理加密") && adminWork.systemLock) {
-                    try {
+            synchronized (QqMessag.class) {
+                long newDate = new Date().getTime();
+                if ((newDate - date) > 5000) {
+                    date = new Date().getTime();
+                    if (!message.startsWith("@管理加密") && AdminWork.systemLock) {
                         send(msg, "系统已锁,请解锁!", 5);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        logger.error(e.getMessage());
+                    } else {
+                        return true;
                     }
-                } else {
-                    return true;
                 }
             }
         }
@@ -166,34 +161,39 @@ public class QqMessag {
      * 2014-5-26	SGJ	新建
      * </pre>
      */
-    public void send(QQMsg msg, String msgText, int id) throws Exception {
-        // 组装QQ消息发送回去
-        QQMsg sendMsg = new QQMsg();
-        switch (msg.getType()) {
-            case GROUP_MSG: // 群消息
-                sendMsg.setGroup(msg.getGroup()); // QQ好友UIN
-                break;
-            case BUDDY_MSG: // 好友消息
-                sendMsg.setTo(msg.getFrom()); // QQ好友UIN
-                break;
-            case DISCUZ_MSG:
-                sendMsg.setDiscuz(msg.getDiscuz()); // QQ好友UIN
-                break;
-            case SESSION_MSG:
-                sendMsg.setTo(msg.getFrom()); // QQ好友UIN
-                break;
-            default:
-                break;
+    public void send(QQMsg msg, String msgText, int id) {
+        try {
+            // 组装QQ消息发送回去
+            QQMsg sendMsg = new QQMsg();
+            switch (msg.getType()) {
+                case GROUP_MSG: // 群消息
+                    sendMsg.setGroup(msg.getGroup()); // QQ好友UIN
+                    break;
+                case BUDDY_MSG: // 好友消息
+                    sendMsg.setTo(msg.getFrom()); // QQ好友UIN
+                    break;
+                case DISCUZ_MSG:
+                    sendMsg.setDiscuz(msg.getDiscuz()); // QQ好友UIN
+                    break;
+                case SESSION_MSG:
+                    sendMsg.setTo(msg.getFrom()); // QQ好友UIN
+                    break;
+                default:
+                    break;
+            }
+            // 发送类型
+            sendMsg.setType(msg.getType());
+            // QQ内容
+            sendMsg.addContentItem(new TextItem(msgText)); // 添加文本内容
+            if (id >= 0) {
+                sendMsg.addContentItem(new FaceItem(id)); // QQ id为0的表情
+            }
+            sendMsg.addContentItem(new FontItem()); // 使用默认字体
+            client.sendMsg(sendMsg, null); // 调用接口发送消息
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error(e.getMessage());
         }
-        // 发送类型
-        sendMsg.setType(msg.getType());
-        // QQ内容
-        sendMsg.addContentItem(new TextItem(msgText)); // 添加文本内容
-        if (id >= 0) {
-            sendMsg.addContentItem(new FaceItem(id)); // QQ id为0的表情
-        }
-        sendMsg.addContentItem(new FontItem()); // 使用默认字体
-        client.sendMsg(sendMsg, null); // 调用接口发送消息
     }
 
     /**

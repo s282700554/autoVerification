@@ -27,9 +27,11 @@ public class NextPerWork implements ExecutionWork {
      */
     @Override
     public void executCommand(QqMessag msgClient, QQMsg msg) throws Exception {
-        logger.warn("更新验包为下一个人!");
-        PackagePerXmlOper.updateNext();
-        String personnel = PackagePerXmlOper.selectVerifyPersonnel();
-        msgClient.send(msg, personnel + "今天验包,别告诉我又不在哦!", 74);
+        synchronized (NextPerWork.class) {
+            logger.warn("更新验包为下一个人!");
+            PackagePerXmlOper.updateNext();
+            String personnel = PackagePerXmlOper.selectVerifyPersonnel();
+            msgClient.send(msg, personnel + "今天验包,别告诉我又不在哦!", 74);
+        }
     }
 }

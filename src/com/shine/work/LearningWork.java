@@ -17,8 +17,6 @@ public class LearningWork implements ExecutionWork {
 
     private static Logger logger = LoggerFactory.getLogger(LearningWork.class);
 
-    private static boolean LEARN_CONTROL = true; 
-    
     /**
      * 
      * 执行学习命令.
@@ -34,8 +32,7 @@ public class LearningWork implements ExecutionWork {
      */
     @Override
     public void executCommand(QqMessag msgClient, QQMsg msg) throws Exception {
-        if (LEARN_CONTROL) {
-            LEARN_CONTROL = false;
+        synchronized (LearningWork.class) {
             String userMsg = msg.getText().trim();
             // 学习
             String commd = userMsg.substring(3, userMsg.length()).trim();
@@ -60,7 +57,6 @@ public class LearningWork implements ExecutionWork {
             } else {
                 msgClient.send(msg, "我不理解你说的什么呢,再教我一遍吧!", 81);
             }
-            LEARN_CONTROL = true;
         }
     }
 }

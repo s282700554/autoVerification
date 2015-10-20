@@ -15,9 +15,9 @@ import com.shine.work.LearningWork;
 import com.shine.work.NextPerWork;
 import com.shine.work.OtherWork;
 import com.shine.work.JavaPacketWork;
-import com.shine.work.adminWork;
-import com.shine.work.bindingMailWork;
-import com.shine.work.sendMailWork;
+import com.shine.work.AdminWork;
+import com.shine.work.BindingMailWork;
+import com.shine.work.SendMailWork;
 
 public class workFactory {
 
@@ -27,23 +27,13 @@ public class workFactory {
     private static Map<String, Object> workMap = new HashMap<String, Object>();
     static {
         workMap.put("验包", new JavaPacketWork());
-        workMap.put("日志", new sendMailWork());
-        workMap.put("管理", new adminWork());
+        workMap.put("日志", new SendMailWork());
+        workMap.put("管理", new AdminWork());
         workMap.put("学习", new LearningWork());
         workMap.put("请假", new NextPerWork());
         workMap.put("数据", new DatabasePackWork());
-        workMap.put("绑定", new bindingMailWork());
+        workMap.put("绑定", new BindingMailWork());
     }
-
-    /**
-     * 是否开启聊天模式,默认为开启
-     */
-    public static boolean isOn = true;
-    
-    /**
-     * 是否开启网络聊天
-     */
-    public static boolean isInternet = true;
     
     /**
      * 根据不同的命令分发.
@@ -59,7 +49,9 @@ public class workFactory {
      */
     public static void createWork(QqMessag msgClient, QQMsg msg) throws Exception {
         String userMsg = msg.getText().trim();
-        logger.warn("接收命令:" + userMsg);
+        if (!"上官".equals(msg.getFrom().getNickname())) {
+            logger.warn("接收命令:" + userMsg);
+        }
         Object object = null;
         ExecutionWork executionWork = null;
         try {
@@ -67,7 +59,7 @@ public class workFactory {
             if (object != null) {
                 executionWork = (ExecutionWork) object;
             } else {
-                if (isOn) {
+                if (OtherWork.isOn) {
                     executionWork = new OtherWork();
                 }
             }

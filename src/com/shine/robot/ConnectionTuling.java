@@ -70,6 +70,7 @@ public class ConnectionTuling {
             message = sendGet(user, question);
         } catch (Exception e) {
             e.printStackTrace();
+            logger.error(e.getMessage());
             throw new Exception("连接网络聊天数据失败!");
         }
         JSONObject jsonObj = new JSONObject(message);
